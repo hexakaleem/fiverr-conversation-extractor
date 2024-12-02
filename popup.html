@@ -5,14 +5,21 @@
   <meta charset="UTF-8">
   <style>
     body {
-      width: 400px;
-      padding: 10px;
+      width: 300px;
+      padding: 8px;
       font-family: Arial, sans-serif;
+      line-height: 1.6;
+    }
+    h2 {
+      font-size: 1.4em;
+      margin-bottom: 8px;
+      text-align: center;
     }
     .status {
       margin: 10px 0;
       padding: 8px;
       border-radius: 4px;
+      text-align: center;
     }
     .success {
       background-color: #e8f5e9;
@@ -26,15 +33,21 @@
       background-color: #e6f3ff;
       color: #0066cc;
     }
-    .contact-item {
-      padding: 8px;
+    .action-button {
       margin: 4px 0;
-      border: 1px solid #ddd;
+      padding: 6px 10px;
+      border: none;
       border-radius: 4px;
       cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      transition: background-color 0.3s ease;
+      display: block;
+      width: 100%;
+      text-align: center;
     }
-    .contact-item:hover {
-      background-color: #f5f5f5;
+    .action-button:hover {
+      background-color: #45a049;
     }
     .conversation-actions {
       margin: 10px 0;
@@ -42,35 +55,45 @@
       border: 1px solid #ddd;
       border-radius: 4px;
       background-color: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    .action-button {
-      margin: 0 5px;
-      padding: 5px 10px;
-      border: none;
+    .progress-counter {
+      text-align: center;
+      font-weight: bold;
+      margin: 10px 0;
+      color: #1565c0;
+    }
+    .progress-log {
+      margin-top: 8px;
+      padding: 8px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      max-height: 80px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .contacts-list {
+      max-height: 250px;
+      overflow-y: auto;
+      margin-top: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .contact-item {
+      padding: 8px;
+      margin: 4px 0;
+      border: 1px solid #ddd;
       border-radius: 4px;
       cursor: pointer;
-      background-color: #4CAF50;
-      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .action-button:hover {
-      background-color: #45a049;
-    }
-    .attachment-button {
-      width: 100%;
-      margin: 5px 0;
-      padding: 5px 10px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      background-color: #2196F3;
-      color: white;
-      text-align: left;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .attachment-button:hover {
-      background-color: #1976D2;
+    .contact-item:hover {
+      background-color: #f5f5f5;
     }
     .attachment-list {
       margin: 10px 0;
@@ -94,33 +117,27 @@
     .attachment-item a:hover {
       text-decoration: underline;
     }
-    .contacts-list {
-      max-height: 300px;
-      overflow-y: auto;
-      margin-top: 15px;
-      border: 1px solid #ddd;
+    .attachment-button {
+      width: 100%;
+      margin: 5px 0;
+      padding: 5px 10px;
+      border: none;
       border-radius: 4px;
+      cursor: pointer;
+      background-color: #2196F3;
+      color: white;
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .attachment-button:hover {
+      background-color: #1976D2;
     }
     .loading {
       text-align: center;
       padding: 10px;
       color: #666;
-    }
-    .progress-counter {
-      text-align: center;
-      font-weight: bold;
-      margin: 10px 0;
-      color: #1565c0;
-    }
-    .progress-log {
-      margin-top: 10px;
-      padding: 10px;
-      background-color: #f5f5f5;
-      border-radius: 4px;
-      max-height: 100px;
-      overflow-y: auto;
-      font-family: monospace;
-      font-size: 12px;
     }
     .log-entry {
       margin: 5px 0;
@@ -130,17 +147,16 @@
     .log-entry.error {
       border-left-color: #c62828;
     }
-    #attachments {
-      margin-top: 10px;
-    }
   </style>
 </head>
 <body>
   <h2>Fiverr Conversation Extractor</h2>
   <div id="status" class="status"></div>
   <div id="conversationActions" class="conversation-actions" style="display: none;">
-    <button id="downloadBtn" class="action-button">📥 Download</button>
-    <button id="openBtn" class="action-button">📄 View in Tab</button>
+    <button id="downloadBtn" class="action-button">📥 Download MD</button>
+    <button id="openBtn" class="action-button">📄 View MD</button>
+    <button id="downloadJsonBtn" class="action-button">📥 Download JSON</button>
+    <button id="viewJsonBtn" class="action-button">📄 View JSON</button>
     <div id="attachments"></div>
   </div>
   <div class="main-actions">

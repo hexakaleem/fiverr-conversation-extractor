@@ -237,7 +237,8 @@ async function fetchConversation(username) {
     // Store the complete conversation data
     chrome.storage.local.set({ 
       conversationData: processedData,
-      markdownContent: convertToMarkdown(processedData)
+      markdownContent: convertToMarkdown(processedData),
+      jsonContent: processedData
     });
 
     // Notify popup about completion

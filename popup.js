@@ -123,7 +123,7 @@ function handleConversationExtracted(data) {
             if (downloadUrl) {
               const downloadBtn = document.createElement('button');
               downloadBtn.className = 'attachment-button';
-              downloadBtn.innerHTML = `📎 ${fileName} <small>(${formatFileSize(fileSize)})</small>`;
+              downloadBtn.innerHTML = ` ${fileName} <small>(${formatFileSize(fileSize)})</small>`;
               downloadBtn.title = fileName;
               downloadBtn.onclick = () => {
                 chrome.downloads.download({
@@ -231,6 +231,36 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.local.get(['markdownContent'], function(result) {
       if (result.markdownContent) {
         const blob = new Blob([result.markdownContent], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        chrome.tabs.create({ url: url });
+      } else {
+        updateStatus('Please extract the conversation first.', true);
+      }
+    });
+  });
+
+  // Download JSON button click handler
+  document.getElementById('downloadJsonBtn').addEventListener('click', () => {
+    chrome.storage.local.get(['jsonContent', 'currentUsername'], function(result) {
+      if (result.jsonContent && result.currentUsername) {
+        const blob = new Blob([JSON.stringify(result.jsonContent, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${result.currentUsername}_conversation.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        updateStatus('Please extract the conversation first.', true);
+      }
+    });
+  });
+
+  // View JSON button click handler
+  document.getElementById('viewJsonBtn').addEventListener('click', () => {
+    chrome.storage.local.get(['jsonContent'], function(result) {
+      if (result.jsonContent) {
+        const blob = new Blob([JSON.stringify(result.jsonContent, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         chrome.tabs.create({ url: url });
       } else {
