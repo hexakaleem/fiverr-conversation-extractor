@@ -76,6 +76,12 @@ async function fetchAllContacts() {
   let oldestTimestamp = null;
   let batchNumber = 1;
   
+  // Clear existing contacts at the start of fetch
+  chrome.storage.local.set({ 
+    allContacts: [],
+    lastContactsFetch: Date.now()
+  });
+  
   async function fetchContactsBatch(olderThan = null) {
     try {
       const url = olderThan 
@@ -113,6 +119,12 @@ async function fetchAllContacts() {
       
       // Add contacts to our collection
       allContacts = [...allContacts, ...contacts];
+      
+      // Update storage with current total
+      chrome.storage.local.set({ 
+        allContacts: allContacts,
+        lastContactsFetch: Date.now()
+      });
       
       // Find the oldest timestamp
       const timestamps = contacts.map(c => c.recentMessageDate);
@@ -241,11 +253,11 @@ async function fetchConversation(username) {
       jsonContent: processedData
     });
 
-    // Notify popup about completion
+    // Notify popup about completion with username
     chrome.runtime.sendMessage({
       type: 'CONVERSATION_EXTRACTED',
       data: processedData,
-      message: `Completed! Extracted ${allMessages.length} messages.`
+      message: `Conversation with ${username} extracted successfully!`
     });
 
   } catch (error) {

@@ -75,25 +75,75 @@
       font-family: monospace;
       font-size: 12px;
     }
+    .contacts-section {
+      margin-top: 16px;
+      padding: 16px;
+      background: #f5f5f5;
+      border-radius: 8px;
+    }
     .contacts-list {
-      max-height: 250px;
+      max-height: 300px;
       overflow-y: auto;
-      margin-top: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+      margin-top: 8px;
     }
     .contact-item {
-      padding: 8px;
-      margin: 4px 0;
-      border: 1px solid #ddd;
+      padding: 12px;
+      background: white;
       border-radius: 4px;
+      margin-bottom: 8px;
       cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .contact-item:hover {
+      background: #e3f2fd;
+    }
+    .contact-name {
+      font-weight: bold;
+      color: #1976d2;
+    }
+    .contact-last-message {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+    .no-contacts {
+      text-align: center;
+      color: #666;
+      padding: 16px;
+    }
+    .attachments-section {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .attachment-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      background: white;
+      padding: 8px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
-    .contact-item:hover {
-      background-color: #f5f5f5;
+    .attachment-info {
+      flex-grow: 1;
+      margin-right: 10px;
+    }
+    .download-btn {
+      background: #1976d2;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .download-btn:hover {
+      background: #1565c0;
     }
     .attachment-list {
       margin: 10px 0;
@@ -101,14 +151,6 @@
       border: 1px solid #ddd;
       border-radius: 4px;
       background-color: #f9f9f9;
-    }
-    .attachment-item {
-      padding: 5px;
-      margin: 3px 0;
-      border-bottom: 1px solid #eee;
-    }
-    .attachment-item:last-child {
-      border-bottom: none;
     }
     .attachment-item a {
       color: #0066cc;
@@ -147,28 +189,51 @@
     .log-entry.error {
       border-left-color: #c62828;
     }
+    .progress-text {
+      margin-top: 8px;
+      color: #666;
+      font-size: 14px;
+      text-align: center;
+    }
+    .current-conversation {
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 10px;
+      padding: 8px;
+      color: #1565c0;
+      border-bottom: 2px solid #e0e0e0;
+    }
   </style>
 </head>
 <body>
   <h2>Fiverr Conversation Extractor</h2>
   <div id="status" class="status"></div>
   <div id="conversationActions" class="conversation-actions" style="display: none;">
+    <div id="currentConversation" class="current-conversation" style="display: none;"></div>
     <button id="downloadBtn" class="action-button">📥 Download MD</button>
     <button id="openBtn" class="action-button">📄 View MD</button>
     <button id="downloadJsonBtn" class="action-button">📥 Download JSON</button>
     <button id="viewJsonBtn" class="action-button">📄 View JSON</button>
-    <div id="attachments"></div>
+    <button id="viewAttachmentsBtn" class="action-button">📎 View Attachments</button>
+    <div id="attachments" class="attachments-section" style="display: none;"></div>
   </div>
   <div class="main-actions">
-    <button id="fetchContactsBtn" class="action-button">Fetch All Contacts</button>
-    <button id="extractBtn" class="action-button">Extract Conversation</button>
+    <div class="button-container">
+      <button id="fetchContactsBtn" class="action-button">Fetch All Contacts</button>
+      <div id="contactsProgress" class="progress-text" style="display: none;"></div>
+    </div>
+    <div class="button-container">
+      <button id="extractBtn" class="action-button">Extract Conversation</button>
+      <div id="extractionProgress" class="progress-text" style="display: none;"></div>
+    </div>
   </div>
   <div id="progressCounter" class="progress-counter" style="display: none;">
     Total Contacts: <span id="contactCount">0</span>
   </div>
   <div id="progressLog" class="progress-log" style="display: none;"></div>
-  <div id="contactsList" class="contacts-list" style="display: none;">
-    <div id="contacts"></div>
+  <div id="contacts" class="contacts-section">
+    <h3>Contacts</h3>
+    <div id="contactsList" class="contacts-list"></div>
   </div>
   <script src="popup.js"></script>
 </body>
