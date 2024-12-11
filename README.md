@@ -11,7 +11,7 @@ A powerful Chrome extension that helps you extract, download, and manage convers
 ## Key Features
 
 - 💬 Extract complete chat histories from Fiverr inbox
-- 📥 Download conversations in clean Markdown format
+- 📥 Download conversations in clean Markdown and JSON formats
 - 📱 View conversations in a dedicated tab interface
 - 📎 Download all conversation attachments
 - 📚 Track and organize conversation history
@@ -44,14 +44,6 @@ A powerful Chrome extension that helps you extract, download, and manage convers
 
 ## Keywords
 `fiverr-chat-export` `fiverr-message-backup` `conversation-extractor` `chat-history-tool` `fiverr-inbox-manager` `freelancer-tools` `client-communication-backup` `message-archiver` `chat-downloader` `fiverr-extension`
-
-## Related Tools
-
-- Fiverr Order Manager
-- Client Communication Tools
-- Freelancer Productivity Suite
-- Message Backup Solutions
-- Chat Export Utilities
 
 ## Installation
 
