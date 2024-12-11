@@ -1,4 +1,4 @@
-# Fiverr Conversation Extractor
+# Fiverr Conversation Extractor &nbsp;&nbsp; [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-☕-orange?style=for-the-badge)](https://www.buymeacoffee.com/ianwaithaka)
 
 A Chrome extension that helps you extract and save conversations from your Fiverr inbox.
 
