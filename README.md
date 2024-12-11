@@ -59,6 +59,19 @@ The extension uses:
 - Modern JavaScript (ES6+)
 - Markdown for conversation export
 
+## Support My Work
+
+<div align="center">
+  
+  [!["Buy Me A Coffee"](https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/ianwaithaka)
+  
+  <p>If you find this project helpful, consider buying me a coffee! ☕️</p>
+  
+  <a href="https://www.buymeacoffee.com/ianwaithaka">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200">
+  </a>
+</div>
+
 ## License
 
 MIT License
