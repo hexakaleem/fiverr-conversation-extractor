@@ -6,8 +6,6 @@ A Chrome extension that extracts and saves Fiverr inbox conversations with suppo
 ![Chrome Web Store](https://img.shields.io/badge/Platform-Chrome-green)
 ![Tags](https://img.shields.io/badge/Tags-Chat%20Export%20%7C%20Message%20Backup%20%7C%20Conversation%20History-blue)
 
-A powerful Chrome extension that helps you extract, download, and manage conversations from your Fiverr inbox. Never lose important client communications again!
-
 ## Key Features
 
 - 💬 Extract complete chat histories from Fiverr inbox
