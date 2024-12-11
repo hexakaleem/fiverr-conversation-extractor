@@ -57,8 +57,8 @@ function displayAttachments(messages) {
         downloadBtn.onclick = () => {
           chrome.downloads.download({
             url: attachment.downloadUrl,
-            filename: attachment.filename,
-            saveAs: true
+            filename: `${message.username}/attachments/${attachment.filename}`,
+            saveAs: false
           });
         };
 
@@ -205,8 +205,8 @@ function handleConversationExtracted(data, message) {
               downloadBtn.onclick = () => {
                 chrome.downloads.download({
                   url: downloadUrl,
-                  filename: fileName,
-                  saveAs: true
+                  filename: `${username}/attachments/${fileName}`,
+                  saveAs: false
                 });
               };
 
@@ -390,11 +390,10 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.local.get(['markdownContent', 'currentUsername'], function(result) {
       if (result.markdownContent && result.currentUsername) {
         const blob = new Blob([result.markdownContent], { type: 'text/markdown' });
-        const url = URL.createObjectURL(blob);
         chrome.downloads.download({
-          url: url,
-          filename: `fiverr_conversation_${result.currentUsername}_${new Date().toISOString().split('T')[0]}.md`,
-          saveAs: true
+          url: URL.createObjectURL(blob),
+          filename: `${result.currentUsername}/conversations/fiverr_conversation_${result.currentUsername}_${new Date().toISOString().split('T')[0]}.md`,
+          saveAs: false
         });
       } else {
         updateStatus('Please extract the conversation first.', true);
@@ -407,8 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.local.get(['markdownContent'], function(result) {
       if (result.markdownContent) {
         const blob = new Blob([result.markdownContent], { type: 'text/markdown' });
-        const url = URL.createObjectURL(blob);
-        chrome.tabs.create({ url: url });
+        chrome.tabs.create({ url: URL.createObjectURL(blob) });
       } else {
         updateStatus('Please extract the conversation first.', true);
       }
@@ -420,12 +418,11 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.local.get(['jsonContent', 'currentUsername'], function(result) {
       if (result.jsonContent && result.currentUsername) {
         const blob = new Blob([JSON.stringify(result.jsonContent, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${result.currentUsername}_conversation.json`;
-        a.click();
-        URL.revokeObjectURL(url);
+        chrome.downloads.download({
+          url: URL.createObjectURL(blob),
+          filename: `${result.currentUsername}/conversations/${result.currentUsername}_conversation.json`,
+          saveAs: false
+        });
       } else {
         updateStatus('Please extract the conversation first.', true);
       }
@@ -437,8 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.local.get(['jsonContent'], function(result) {
       if (result.jsonContent) {
         const blob = new Blob([JSON.stringify(result.jsonContent, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        chrome.tabs.create({ url: url });
+        chrome.tabs.create({ url: URL.createObjectURL(blob) });
       } else {
         updateStatus('Please extract the conversation first.', true);
       }

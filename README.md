@@ -32,6 +32,29 @@ A Chrome extension that extracts and saves Fiverr inbox conversations with suppo
 - 📊 **Analytics Ready**: Export in formats suitable for analysis
 - 🎨 **Custom Formatting**: Choose how your exports look
 
+## Download Organization
+
+When you download any file from the extension:
+
+- It will automatically create a folder with the contact's username.
+- Attachments will be stored in an `attachments` subfolder.
+- Conversation files (both markdown and JSON) will be stored in a `conversations` subfolder.
+- All folders will be created automatically by Chrome if they don't exist.
+
+The files will be organized like this:
+
+```
+[Downloads Directory]
+└── [username]
+    ├── attachments
+    │   └── [attachment files]
+    └── conversations
+        ├── fiverr_conversation_[username]_[date].md
+        └── [username]_conversation.json
+```
+
+This structure keeps all files related to a specific contact organized in their own directory, making it easier to manage multiple conversations and their associated files.
+
 ## Use Cases
 
 - 💼 **Portfolio Building**: Extract successful project discussions
