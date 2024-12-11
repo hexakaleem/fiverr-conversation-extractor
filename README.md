@@ -1,6 +1,6 @@
 # Fiverr Conversation Extractor &nbsp;&nbsp; [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-☕-orange?style=for-the-badge)](https://www.buymeacoffee.com/ianwaithaka)
 
-A Chrome extension that extracts and saves Fiverr inbox conversations with support for attachments, replies, and markdown export. Features include batch contact fetching, conversation downloading, and more.
+A Chrome extension that extracts and saves Fiverr inbox conversations with support for attachments, replies, and markdown export. Features include batch contact fetching, conversation downloading in both markdown and json formats.
 
 ![GitHub](https://img.shields.io/github/license/royal-crisis/fiverr-conversation-extractor)
 ![Chrome Web Store](https://img.shields.io/badge/Platform-Chrome-green)
