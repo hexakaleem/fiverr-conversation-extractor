@@ -6,7 +6,7 @@ function extractUsername(url) {
 }
 
 // Helper function to format date according to user preference
-function formatDate(timestamp) {
+async function formatDate(timestamp) {
   const date = new Date(parseInt(timestamp));
   const day = date.getDate().toString().padStart(2, '0');
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -14,28 +14,32 @@ function formatDate(timestamp) {
   const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
   
   // Get user's preferred format from storage, default to DD/MM/YYYY
-  let format = localStorage.getItem('dateFormat') || 'DD/MM/YYYY';
-  
-  let dateStr;
-  switch(format) {
-    case 'MM/DD/YYYY':
-      dateStr = `${month}/${day}/${year}`;
-      break;
-    case 'YYYY/MM/DD':
-      dateStr = `${year}/${month}/${day}`;
-      break;
-    case 'DD-MM-YYYY':
-      dateStr = `${day}-${month}-${year}`;
-      break;
-    default: // DD/MM/YYYY
-      dateStr = `${day}/${month}/${year}`;
-  }
-  
-  return `${dateStr}, ${time}`;
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['dateFormat'], function(result) {
+      const format = result.dateFormat || 'DD/MM/YYYY';
+      
+      let dateStr;
+      switch(format) {
+        case 'MM/DD/YYYY':
+          dateStr = `${month}/${day}/${year}`;
+          break;
+        case 'YYYY/MM/DD':
+          dateStr = `${year}/${month}/${day}`;
+          break;
+        case 'DD-MM-YYYY':
+          dateStr = `${day}-${month}-${year}`;
+          break;
+        default: // DD/MM/YYYY
+          dateStr = `${day}/${month}/${year}`;
+      }
+      
+      resolve(`${dateStr}, ${time}`);
+    });
+  });
 }
 
 // Function to convert conversation to markdown
-function convertToMarkdown(data) {
+async function convertToMarkdown(data) {
   // Get the other user's username from the first message
   let otherUsername = '';
   if (data.messages && data.messages.length > 0) {
@@ -50,9 +54,10 @@ function convertToMarkdown(data) {
 
   let markdown = `# Conversation with ${otherUsername}\n\n`;
   
-  data.messages.forEach(message => {
+  // Process messages sequentially to maintain order
+  for (const message of data.messages) {
     // Convert Unix timestamp to formatted date using user's preferred format
-    const timestamp = formatDate(message.createdAt);
+    const timestamp = await formatDate(message.createdAt);
     const sender = message.sender || 'Unknown';
     
     markdown += `### ${sender} (${timestamp})\n`;
@@ -60,7 +65,7 @@ function convertToMarkdown(data) {
     // Show replied-to message if exists
     if (message.repliedToMessage) {
       const repliedMsg = message.repliedToMessage;
-      const repliedTime = formatDate(repliedMsg.createdAt);
+      const repliedTime = await formatDate(repliedMsg.createdAt);
       markdown += `> Replying to ${repliedMsg.sender} (${repliedTime}):\n`;
       markdown += `> ${repliedMsg.body.replace(/\n/g, '\n> ')}\n\n`;
     }
@@ -73,21 +78,21 @@ function convertToMarkdown(data) {
     // Add attachments if any
     if (message.attachments && message.attachments.length > 0) {
       markdown += '\n**Attachments:**\n';
-      message.attachments.forEach(attachment => {
+      for (const attachment of message.attachments) {
         // Check if attachment has required fields
         if (attachment && typeof attachment === 'object') {
           const fileName = attachment.file_name || attachment.filename || 'Unnamed File';
           const fileSize = attachment.file_size || attachment.fileSize || 0;
-          const attachmentTime = attachment.created_at ? ` (uploaded on ${formatDate(attachment.created_at)})` : '';
+          const attachmentTime = attachment.created_at ? ` (uploaded on ${await formatDate(attachment.created_at)})` : '';
           markdown += `- ${fileName} (${formatFileSize(fileSize)})${attachmentTime}\n`;
         } else {
           markdown += `- File attachment (size unknown)\n`;
         }
-      });
+      }
     }
     
     markdown += '\n---\n\n';
-  });
+  }
   
   return markdown;
 }
@@ -241,16 +246,22 @@ async function fetchConversation(username) {
       }
 
       // Process messages in this batch
-      const processedMessages = data.messages.map(message => ({
+      const processedMessages = await Promise.all(data.messages.map(async message => ({
         ...message,
-        attachments: message.attachments?.map(attachment => ({
+        formattedTime: await formatDate(message.createdAt),
+        attachments: await Promise.all((message.attachments || []).map(async attachment => ({
           filename: attachment.file_name,
           downloadUrl: attachment.download_url,
           fileSize: attachment.file_size,
           contentType: attachment.content_type,
-          created_at: attachment.created_at || message.createdAt
-        })) || []
-      }));
+          created_at: attachment.created_at || message.createdAt,
+          formattedTime: await formatDate(attachment.created_at || message.createdAt)
+        }))),
+        repliedToMessage: message.repliedToMessage ? {
+          ...message.repliedToMessage,
+          formattedTime: await formatDate(message.repliedToMessage.createdAt)
+        } : null
+      })));
 
       // Add messages to our collection
       allMessages = [...allMessages, ...processedMessages];
@@ -274,13 +285,16 @@ async function fetchConversation(username) {
     // Create final processed data
     const processedData = {
       conversationId: conversationId,
-      messages: allMessages.sort((a, b) => a.createdAt - b.createdAt) // Sort by timestamp
+      messages: allMessages.sort((a, b) => a.createdAt - b.createdAt)
     };
+
+    // Generate markdown with the current date format
+    const markdown = await convertToMarkdown(processedData);
 
     // Store the complete conversation data
     chrome.storage.local.set({ 
       conversationData: processedData,
-      markdownContent: convertToMarkdown(processedData),
+      markdownContent: markdown,
       jsonContent: processedData
     });
 
