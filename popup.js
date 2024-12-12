@@ -41,39 +41,44 @@ function displayAttachments(messages) {
   const attachmentsDiv = document.getElementById('attachments');
   attachmentsDiv.innerHTML = '';
 
-  messages.forEach(message => {
-    if (message.attachments && message.attachments.length > 0) {
-      message.attachments.forEach(attachment => {
-        const attachmentDiv = document.createElement('div');
-        attachmentDiv.className = 'attachment-item';
-        
-        const info = document.createElement('div');
-        info.className = 'attachment-info';
-        
-        // Format the timestamp
-        const timestamp = attachment.created_at ? new Date(parseInt(attachment.created_at)).toLocaleString() : 'Time unknown';
-        
-        info.innerHTML = `
-          <div class="attachment-name">${attachment.filename} (${formatFileSize(attachment.fileSize)})</div>
-          <div class="attachment-time">📅 ${timestamp}</div>
-        `;
-        
-        const downloadBtn = document.createElement('button');
-        downloadBtn.className = 'download-btn';
-        downloadBtn.textContent = 'Download';
-        downloadBtn.onclick = () => {
-          chrome.downloads.download({
-            url: attachment.downloadUrl,
-            filename: `${message.username}/attachments/${attachment.filename}`,
-            saveAs: false
-          });
-        };
+  // Get current username from storage
+  chrome.storage.local.get(['currentUsername'], function(result) {
+    const username = result.currentUsername;
+    
+    messages.forEach(message => {
+      if (message.attachments && message.attachments.length > 0) {
+        message.attachments.forEach(attachment => {
+          const attachmentDiv = document.createElement('div');
+          attachmentDiv.className = 'attachment-item';
+          
+          const info = document.createElement('div');
+          info.className = 'attachment-info';
+          
+          // Format the timestamp
+          const timestamp = attachment.created_at ? new Date(parseInt(attachment.created_at)).toLocaleString() : 'Time unknown';
+          
+          info.innerHTML = `
+            <div class="attachment-name">${attachment.filename} (${formatFileSize(attachment.fileSize)})</div>
+            <div class="attachment-time">📅 ${timestamp}</div>
+          `;
+          
+          const downloadBtn = document.createElement('button');
+          downloadBtn.className = 'download-btn';
+          downloadBtn.textContent = 'Download';
+          downloadBtn.onclick = () => {
+            chrome.downloads.download({
+              url: attachment.downloadUrl,
+              filename: `${username}/attachments/${attachment.filename}`,
+              saveAs: false
+            });
+          };
 
-        attachmentDiv.appendChild(info);
-        attachmentDiv.appendChild(downloadBtn);
-        attachmentsDiv.appendChild(attachmentDiv);
-      });
-    }
+          attachmentDiv.appendChild(info);
+          attachmentDiv.appendChild(downloadBtn);
+          attachmentsDiv.appendChild(attachmentDiv);
+        });
+      }
+    });
   });
 }
 
