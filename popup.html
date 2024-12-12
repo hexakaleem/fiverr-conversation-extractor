@@ -118,20 +118,37 @@
       border-radius: 4px;
       max-height: 200px;
       overflow-y: auto;
+      width: 100%;
+      box-sizing: border-box;
     }
     .attachment-item {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       background: white;
       padding: 8px;
       margin-bottom: 8px;
       border-radius: 4px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      gap: 8px;
+      min-width: 0; /* Enable flex item shrinking */
     }
     .attachment-info {
-      flex-grow: 1;
-      margin-right: 10px;
+      flex: 1;
+      min-width: 0; /* Enable text truncation */
+      overflow: hidden;
+      word-wrap: break-word;
+      word-break: break-word;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .attachment-name {
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+    .attachment-time {
+      font-size: 11px;
+      color: #666;
     }
     .download-btn {
       background: #1976d2;
@@ -141,6 +158,8 @@
       border-radius: 4px;
       cursor: pointer;
       font-size: 12px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .download-btn:hover {
       background: #1565c0;
@@ -202,6 +221,23 @@
       padding: 8px;
       color: #1565c0;
       border-bottom: 2px solid #e0e0e0;
+    }
+    /* Responsive adjustments */
+    @media (max-width: 400px) {
+      .attachment-item {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .download-btn {
+        margin-top: 6px;
+        width: 100%;
+        padding: 6px;
+      }
+      
+      .attachment-info {
+        margin-right: 0;
+      }
     }
   </style>
 </head>
