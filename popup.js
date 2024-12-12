@@ -1,3 +1,32 @@
+// Import formatDate function from content.js
+function formatDate(timestamp) {
+  const date = new Date(parseInt(timestamp));
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+  
+  // Get user's preferred format from storage, default to DD/MM/YYYY
+  let format = localStorage.getItem('dateFormat') || 'DD/MM/YYYY';
+  
+  let dateStr;
+  switch(format) {
+    case 'MM/DD/YYYY':
+      dateStr = `${month}/${day}/${year}`;
+      break;
+    case 'YYYY/MM/DD':
+      dateStr = `${year}/${month}/${day}`;
+      break;
+    case 'DD-MM-YYYY':
+      dateStr = `${day}-${month}-${year}`;
+      break;
+    default: // DD/MM/YYYY
+      dateStr = `${day}/${month}/${year}`;
+  }
+  
+  return `${dateStr}, ${time}`;
+}
+
 // Update status message in popup
 function updateStatus(message, isError = false, isProgress = false) {
   const statusDiv = document.getElementById('status');
@@ -54,8 +83,8 @@ function displayAttachments(messages) {
           const info = document.createElement('div');
           info.className = 'attachment-info';
           
-          // Format the timestamp
-          const timestamp = attachment.created_at ? new Date(parseInt(attachment.created_at)).toLocaleString() : 'Time unknown';
+          // Format the timestamp using the same function
+          const timestamp = attachment.created_at ? formatDate(attachment.created_at) : 'Time unknown';
           
           info.innerHTML = `
             <div class="attachment-name">${attachment.filename} (${formatFileSize(attachment.fileSize)})</div>
@@ -99,7 +128,7 @@ function displayContacts(contacts) {
     contactDiv.className = 'contact-item';
     
     const username = contact.username || 'Unknown User';
-    const lastMessage = new Date(contact.recentMessageDate).toLocaleString();
+    const lastMessage = formatDate(contact.recentMessageDate);
     
     contactDiv.innerHTML = `
       <div class="contact-name">${username}</div>
@@ -278,6 +307,89 @@ function stopStatusChecking() {
     }
 }
 
+// Settings modal handlers
+function initializeSettings() {
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsModal = document.getElementById('settingsModal');
+  const modalBackdrop = document.getElementById('modalBackdrop');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const dateFormatSelect = document.getElementById('dateFormat');
+
+  // Load saved format
+  const savedFormat = localStorage.getItem('dateFormat') || 'DD/MM/YYYY';
+  dateFormatSelect.value = savedFormat;
+
+  // Show modal
+  settingsBtn.addEventListener('click', () => {
+    settingsModal.style.display = 'block';
+    modalBackdrop.style.display = 'block';
+  });
+
+  // Hide modal
+  function hideModal() {
+    settingsModal.style.display = 'none';
+    modalBackdrop.style.display = 'none';
+  }
+
+  cancelBtn.addEventListener('click', hideModal);
+  modalBackdrop.addEventListener('click', hideModal);
+
+  // Save settings
+  saveBtn.addEventListener('click', () => {
+    const newFormat = dateFormatSelect.value;
+    localStorage.setItem('dateFormat', newFormat);
+    
+    // Refresh all displays with new format
+    chrome.storage.local.get(['conversationData', 'currentUsername'], function(result) {
+      if (result.conversationData) {
+        // Re-process the conversation data with new format
+        const processedData = {
+          ...result.conversationData,
+          messages: result.conversationData.messages.map(msg => ({
+            ...msg,
+            formattedTime: formatDate(msg.createdAt),
+            repliedToMessage: msg.repliedToMessage ? {
+              ...msg.repliedToMessage,
+              formattedTime: formatDate(msg.repliedToMessage.createdAt)
+            } : null
+          }))
+        };
+
+        // Update storage with new formatted data
+        chrome.storage.local.set({
+          conversationData: processedData,
+          markdownContent: convertToMarkdown(processedData),
+          jsonContent: processedData
+        }, () => {
+          // After storage is updated, refresh the UI
+          displayAttachments(processedData.messages);
+          
+          // Force reload of markdown content if it's currently viewed
+          chrome.storage.local.get(['markdownContent'], function(result) {
+            if (result.markdownContent) {
+              const blob = new Blob([result.markdownContent], { type: 'text/markdown' });
+              const existingMarkdownTab = document.querySelector('a[href*="markdown"]');
+              if (existingMarkdownTab) {
+                existingMarkdownTab.href = URL.createObjectURL(blob);
+              }
+            }
+          });
+        });
+      }
+    });
+    
+    // Refresh contacts display
+    chrome.storage.local.get(['allContacts'], function(result) {
+      if (result.allContacts) {
+        displayContacts(result.allContacts);
+      }
+    });
+
+    hideModal();
+  });
+}
+
 // Initialize popup
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize connection with background script
@@ -425,6 +537,9 @@ document.addEventListener('DOMContentLoaded', () => {
       handleConversationExtracted(result.conversationData);
     }
   });
+
+  // Initialize settings
+  initializeSettings();
 });
 
 // Handle messages from content script
@@ -460,3 +575,61 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 window.addEventListener('unload', () => {
   stopStatusChecking();
 });
+
+// Import convertToMarkdown function
+function convertToMarkdown(data) {
+  // Get the other user's username from the first message
+  let otherUsername = '';
+  if (data.messages && data.messages.length > 0) {
+    const firstMessage = data.messages[0];
+    // Get the username that's not the current user
+    if (firstMessage.sender === data.username) {
+      otherUsername = firstMessage.recipient;
+    } else {
+      otherUsername = firstMessage.sender;
+    }
+  }
+
+  let markdown = `# Conversation with ${otherUsername}\n\n`;
+  
+  data.messages.forEach(message => {
+    // Convert Unix timestamp to formatted date using user's preferred format
+    const timestamp = formatDate(message.createdAt);
+    const sender = message.sender || 'Unknown';
+    
+    markdown += `### ${sender} (${timestamp})\n`;
+    
+    // Show replied-to message if exists
+    if (message.repliedToMessage) {
+      const repliedMsg = message.repliedToMessage;
+      const repliedTime = formatDate(repliedMsg.createdAt);
+      markdown += `> Replying to ${repliedMsg.sender} (${repliedTime}):\n`;
+      markdown += `> ${repliedMsg.body.replace(/\n/g, '\n> ')}\n\n`;
+    }
+    
+    // Add message text
+    if (message.body) {
+      markdown += `${message.body}\n`;
+    }
+    
+    // Add attachments if any
+    if (message.attachments && message.attachments.length > 0) {
+      markdown += '\n**Attachments:**\n';
+      message.attachments.forEach(attachment => {
+        // Check if attachment has required fields
+        if (attachment && typeof attachment === 'object') {
+          const fileName = attachment.file_name || attachment.filename || 'Unnamed File';
+          const fileSize = attachment.file_size || attachment.fileSize || 0;
+          const attachmentTime = attachment.created_at ? ` (uploaded on ${formatDate(attachment.created_at)})` : '';
+          markdown += `- ${fileName} (${formatFileSize(fileSize)})${attachmentTime}\n`;
+        } else {
+          markdown += `- File attachment (size unknown)\n`;
+        }
+      });
+    }
+    
+    markdown += '\n---\n\n';
+  });
+  
+  return markdown;
+}

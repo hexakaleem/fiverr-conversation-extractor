@@ -5,6 +5,35 @@ function extractUsername(url) {
   return match ? match[1] : null;
 }
 
+// Helper function to format date according to user preference
+function formatDate(timestamp) {
+  const date = new Date(parseInt(timestamp));
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+  
+  // Get user's preferred format from storage, default to DD/MM/YYYY
+  let format = localStorage.getItem('dateFormat') || 'DD/MM/YYYY';
+  
+  let dateStr;
+  switch(format) {
+    case 'MM/DD/YYYY':
+      dateStr = `${month}/${day}/${year}`;
+      break;
+    case 'YYYY/MM/DD':
+      dateStr = `${year}/${month}/${day}`;
+      break;
+    case 'DD-MM-YYYY':
+      dateStr = `${day}-${month}-${year}`;
+      break;
+    default: // DD/MM/YYYY
+      dateStr = `${day}/${month}/${year}`;
+  }
+  
+  return `${dateStr}, ${time}`;
+}
+
 // Function to convert conversation to markdown
 function convertToMarkdown(data) {
   // Get the other user's username from the first message
@@ -22,8 +51,8 @@ function convertToMarkdown(data) {
   let markdown = `# Conversation with ${otherUsername}\n\n`;
   
   data.messages.forEach(message => {
-    // Convert Unix timestamp (milliseconds) to Date
-    const timestamp = new Date(parseInt(message.createdAt)).toLocaleString();
+    // Convert Unix timestamp to formatted date using user's preferred format
+    const timestamp = formatDate(message.createdAt);
     const sender = message.sender || 'Unknown';
     
     markdown += `### ${sender} (${timestamp})\n`;
@@ -31,7 +60,7 @@ function convertToMarkdown(data) {
     // Show replied-to message if exists
     if (message.repliedToMessage) {
       const repliedMsg = message.repliedToMessage;
-      const repliedTime = new Date(parseInt(repliedMsg.createdAt)).toLocaleString();
+      const repliedTime = formatDate(repliedMsg.createdAt);
       markdown += `> Replying to ${repliedMsg.sender} (${repliedTime}):\n`;
       markdown += `> ${repliedMsg.body.replace(/\n/g, '\n> ')}\n\n`;
     }
@@ -49,7 +78,8 @@ function convertToMarkdown(data) {
         if (attachment && typeof attachment === 'object') {
           const fileName = attachment.file_name || attachment.filename || 'Unnamed File';
           const fileSize = attachment.file_size || attachment.fileSize || 0;
-          markdown += `- ${fileName} (${formatFileSize(fileSize)})\n`;
+          const attachmentTime = attachment.created_at ? ` (uploaded on ${formatDate(attachment.created_at)})` : '';
+          markdown += `- ${fileName} (${formatFileSize(fileSize)})${attachmentTime}\n`;
         } else {
           markdown += `- File attachment (size unknown)\n`;
         }
