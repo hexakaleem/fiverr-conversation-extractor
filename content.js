@@ -217,7 +217,8 @@ async function fetchConversation(username) {
           filename: attachment.file_name,
           downloadUrl: attachment.download_url,
           fileSize: attachment.file_size,
-          contentType: attachment.content_type
+          contentType: attachment.content_type,
+          created_at: attachment.created_at || message.createdAt
         })) || []
       }));
 

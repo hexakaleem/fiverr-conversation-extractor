@@ -49,7 +49,14 @@ function displayAttachments(messages) {
         
         const info = document.createElement('div');
         info.className = 'attachment-info';
-        info.textContent = `${attachment.filename} (${formatFileSize(attachment.fileSize)})`;
+        
+        // Format the timestamp
+        const timestamp = attachment.created_at ? new Date(parseInt(attachment.created_at)).toLocaleString() : 'Time unknown';
+        
+        info.innerHTML = `
+          <div class="attachment-name">${attachment.filename} (${formatFileSize(attachment.fileSize)})</div>
+          <div class="attachment-time">📅 ${timestamp}</div>
+        `;
         
         const downloadBtn = document.createElement('button');
         downloadBtn.className = 'download-btn';
@@ -170,61 +177,21 @@ function handleConversationExtracted(data, message) {
   const actionsDiv = document.getElementById('conversationActions');
   actionsDiv.style.display = 'block';
 
-  // Handle attachments if any
-  const attachmentsDiv = document.getElementById('attachments');
-  const viewAttachmentsBtn = document.getElementById('viewAttachmentsBtn');
-  attachmentsDiv.innerHTML = ''; // Clear previous attachments
-  
-  let hasAttachments = false;
-  let totalAttachments = 0;
-
-  // Process attachments from all messages
+  // Display attachments using the displayAttachments function
   if (data && data.messages) {
-    data.messages.forEach(message => {
-      if (message.attachments && message.attachments.length > 0) {
-        hasAttachments = true;
-        totalAttachments += message.attachments.length;
-        message.attachments.forEach(attachment => {
-          // Check if attachment has required fields
-          if (attachment && typeof attachment === 'object') {
-            const fileName = attachment.file_name || attachment.filename || 'Unnamed File';
-            const fileSize = attachment.file_size || attachment.fileSize || 0;
-            const downloadUrl = attachment.download_url || attachment.downloadUrl;
-
-            if (downloadUrl) {
-              const attachmentDiv = document.createElement('div');
-              attachmentDiv.className = 'attachment-item';
-              
-              const info = document.createElement('div');
-              info.className = 'attachment-info';
-              info.textContent = `${fileName} (${formatFileSize(fileSize)})`;
-              
-              const downloadBtn = document.createElement('button');
-              downloadBtn.className = 'download-btn';
-              downloadBtn.textContent = 'Download';
-              downloadBtn.onclick = () => {
-                chrome.downloads.download({
-                  url: downloadUrl,
-                  filename: `${username}/attachments/${fileName}`,
-                  saveAs: false
-                });
-              };
-
-              attachmentDiv.appendChild(info);
-              attachmentDiv.appendChild(downloadBtn);
-              attachmentsDiv.appendChild(attachmentDiv);
-            }
-          }
-        });
-      }
-    });
+    displayAttachments(data.messages);
   }
 
   // Show/Hide attachments button based on whether there are attachments
+  const viewAttachmentsBtn = document.getElementById('viewAttachmentsBtn');
   if (viewAttachmentsBtn) {
-    if (hasAttachments) {
+    const totalAttachments = data?.messages?.reduce((total, message) => 
+      total + (message.attachments?.length || 0), 0) || 0;
+
+    if (totalAttachments > 0) {
       viewAttachmentsBtn.style.display = 'block';
       viewAttachmentsBtn.onclick = () => {
+        const attachmentsDiv = document.getElementById('attachments');
         const isVisible = attachmentsDiv.style.display === 'block';
         attachmentsDiv.style.display = isVisible ? 'none' : 'block';
         viewAttachmentsBtn.textContent = isVisible 
