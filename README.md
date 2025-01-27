@@ -64,7 +64,7 @@ This structure keeps all files related to a specific contact organized in their 
 - 🎓 **Learning**: Review past successful interactions
 
 ## Keywords
-`fiverr-chat-export` `fiverr-message-backup` `conversation-extractor` `chat-history-tool` `fiverr-inbox-manager` `freelancer-tools` `client-communication-backup` `message-archiver` `chat-downloader` `fiverr-extension`
+`fiverr-chat-export` `fiverr-message-backup` `Fiverr-inbox-manager` `Fiverr productivity tool` `conversation-extractor` `chat-history-tool` `fiverr-inbox-manager` `freelancer-tools` `client-communication-backup` `message-archiver` `chat-downloader` `fiverr-extension`
 
 ## Installation
 
