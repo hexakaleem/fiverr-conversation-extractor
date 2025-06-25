@@ -1,4 +1,4 @@
-# Fiverr Conversation Extractor &nbsp;&nbsp; [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-☕-orange?style=for-the-badge)](https://www.buymeacoffee.com/mgpi)
+# Fiverr Conversation Extractor &nbsp;&nbsp; [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-☕-orange?style=for-the-badge)](https://www.buymeacoffee.com/theteam)
 
 A Chrome extension that extracts and saves Fiverr inbox conversations with support for attachments, replies, and markdown export. Features include batch contact fetching, conversation downloading in both markdown and json formats.
 
@@ -143,11 +143,11 @@ The extension uses:
 
 <div align="center">
   
-  [!["Buy Me A Coffee"](https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/mgpi)
+  [!["Buy Me A Coffee"](https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/theteam)
   
   <p>If you find this project helpful, consider buying me a coffee! ☕️</p>
   
-  <a href="https://www.buymeacoffee.com/mgpi">
+  <a href="https://www.buymeacoffee.com/theteam">
     <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200">
   </a>
 </div>
